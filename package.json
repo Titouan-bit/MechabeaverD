@@ -1,0 +1,15 @@
+{
+  "name": "mechabeaverd",
+  "version": "1.0.0",
+  "description": "Bot Discord",
+  "main": "serverD.js",
+  "scripts": {
+    "start": "node serverD.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "discord.js": "^14.14.1",
+    "express": "^4.18.2",
+    "mongoose": "^8.1.1"
+  }
+}
