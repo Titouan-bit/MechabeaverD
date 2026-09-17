@@ -121,21 +121,22 @@ client.on('messageCreate', async (message) => {
             const args = text.slice("/ticket-themes".length).trim();
 
             if (!args) {
-                return await message.channel.reply("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /!ticket-themes bug, question, autre`)");
+                // CORRECTION ICI : Remplacement de .reply() par .send()
+                return await message.channel.send("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /ticket-themes bug, question, autre)");
             }
 
             const themes = args.split(',').map(theme => theme.trim());
             ticketthemes.push(...themes);
 
-            await message.channel.reply('✅ thèmes mis à jour ! J\'envoie le message');
+            await message.channel.send('✅ thèmes mis à jour ! J\'envoie le message');
             if (TicketChannel) {
                 await SendTicket(TicketChannel);
             } else {
-                await message.channel.reply('❌ Aucun salon de ticket n\'a été sélectionné au préalable.');
+                await message.channel.send('❌ Aucun salon de ticket n\'a été sélectionné au préalable.');
             }
 
         } else {
-            await message.channel.reply('❌ Tu as dépassé le temps relance la commande !');
+            await message.channel.send('❌ Tu as dépassé le temps relance la commande !');
         }
     }
 });
