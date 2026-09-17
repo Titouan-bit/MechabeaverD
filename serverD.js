@@ -2,7 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
 const mongoose = require('mongoose');
-const send = require('send');
 
 const app = express();
 app.use(cors());
@@ -33,9 +32,6 @@ client.once('ready', () => {
     console.log(`🤖 Bot Discord connecté en tant que ${client.user.tag} !`);
 });
 
-const ticketChoices = async function(TicketChannel) {
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-}
 const SendTicket = async function(TicketChannel) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
@@ -89,7 +85,6 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         row.addComponents(ticketButtonG, ticketButtonF);
     }
 
-
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
 }
 
@@ -121,7 +116,7 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    if (text.startsWith("/ticket-themes")) {
+    if (text.startsWith("!ticket-themes")) {
         if (Time) {
             const args = text.slice("!ticket-themes".length).trim();
 
@@ -130,17 +125,19 @@ client.on('messageCreate', async (message) => {
             }
 
             const themes = args.split(',').map(theme => theme.trim());
-
             ticketthemes.push(...themes);
 
-            await message.channel.reply('✅ thèmes mis à jour ! J\'envoie le message')
-            await SendTicket(TicketChannel);
+            await message.channel.reply('✅ thèmes mis à jour ! J\'envoie le message');
+            if (TicketChannel) {
+                await SendTicket(TicketChannel);
+            } else {
+                await message.channel.reply('❌ Aucun salon de ticket n\'a été sélectionné au préalable.');
+            }
 
         } else {
-            await message.channel.reply('❌ Tu as dépassé le temps relance la commande !')
+            await message.channel.reply('❌ Tu as dépassé le temps relance la commande !');
         }
     }
-
 });
 
 client.on('interactionCreate', async function(interaction) {
@@ -155,14 +152,13 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
-        Time()
-    
+        await interaction.reply({ content: `✅ Salon sélectionné : ${selectedChannel.name}. Maintenant choisissez les thèmes avec \`!ticket-themes th1, th2\` dans les 3min`, ephemeral: true });
+        Time();
     }
 
     if (interaction.customId === "good") {
         const selectedChannel = interaction.guild.channels.cache.find(
-            (channel) => channel.name.includes('tickets') && channel.type === ChannelType.GuildText
+            (channel) => channel.name.toLowerCase().includes('ticket') && channel.type === ChannelType.GuildText
         );
 
         if (!selectedChannel) {
@@ -170,8 +166,8 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
-        Time()
+        await interaction.reply({ content: `✅ Salon sélectionné : ${selectedChannel.name}. Maintenant choisissez les thèmes avec \`!ticket-themes th1, th2\` dans les 3min`, ephemeral: true });
+        Time();
     }
 
     if (interaction.customId === "false") {
