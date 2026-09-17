@@ -28,7 +28,7 @@ client.once('ready', () => {
     console.log(`🤖 Bot Discord connecté en tant que ${client.user.tag} !`);
 });
 
-const SendVerifTickets = async function() {
+const SendVerifTickets = async function(TicketsChanel, message) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
     const ticketEmbed = new EmbedBuilder()
