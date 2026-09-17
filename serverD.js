@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
 const mongoose = require('mongoose');
+const send = require('send');
 
 const app = express();
 app.use(cors());
@@ -88,7 +89,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         row.addComponents(ticketButtonG, ticketButtonF);
     }
 
-    await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-theme (themes séparés par une ,) dans les 3min')
+    await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
     Time()
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
 }
@@ -121,8 +122,20 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    if (text.startsWith("!ticket-themes")) {
+    if (text.startsWith("/ticket-themes")) {
         if (Time) {
+            const args = text.slice("!ticket-themes".length).trim();
+
+            if (!args) {
+                return await message.channel.reply("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: `!ticket-themes bug, question, autre`)");
+            }
+
+            const themes = args.split(',').map(theme => theme.trim());
+
+            ticketthemes.push(...themes);
+
+            await message.channel.reply('✅ thèmes mis à jour ! J\'envoie le message')
+            await SendTicket(TicketChannel);
 
         } else {
             await message.channel.reply('❌ Tu as dépassé le temps relance la commande !')
@@ -144,8 +157,7 @@ client.on('interactionCreate', async function(interaction) {
 
         TicketChannel = selectedChannel;
         await interaction.reply({ content: `✅ OK j'envoie le panneau de tickets dans : ${selectedChannel.name}`, ephemeral: true });
-        
-        await SendTicket(TicketChannel);
+    
     }
 
     if (interaction.customId === "good") {
@@ -159,8 +171,6 @@ client.on('interactionCreate', async function(interaction) {
 
         TicketChannel = selectedChannel;
         await interaction.reply({ content: `✅ OK j'envoie le panneau de tickets dans : ${selectedChannel.name}`, ephemeral: true });
-        
-        await SendTicket(TicketChannel);
     }
 
     if (interaction.customId === "false") {
