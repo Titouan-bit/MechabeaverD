@@ -107,7 +107,8 @@ client.on('messageCreate', async (message) => {
 
     if (text === "/add-ticket") {
         const TicketsChanel = message.guild.channels.cache.filter(
-            (channel) => channel.name.toLowerCase().includes('ticket') && channel.type === ChannelType.GuildText
+            (channel) => channel.name.toLowerCase().includes('ticket') && 
+            (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
         );
         
         if (TicketsChanel.size === 0) {
