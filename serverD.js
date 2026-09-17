@@ -3,7 +3,6 @@ const cors = require('cors');
 const { Client, GatewayIntentBits } = require('discord.js');
 const mongoose = require('mongoose');
 const { ChannelType } = require('discord.js');
-const { createElement } = require('react');
 
 const app = express();
 app.use(cors());
