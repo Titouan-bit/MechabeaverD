@@ -152,7 +152,7 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: `✅ Salon sélectionné : ${selectedChannel.name}. Maintenant choisissez les thèmes avec \`!ticket-themes th1, th2\` dans les 3min`, ephemeral: true });
+        await message.channel.send({content : 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min', ephemeral: true });
         Time();
     }
 
@@ -166,7 +166,7 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await message.channel.send('Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min');
+        await message.channel.send({content : 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min', ephemeral: true });
         Time();
     }
 
