@@ -110,6 +110,7 @@ client.on('messageCreate', async (message) => {
             (channel) => channel.name.toLowerCase().includes('ticket') && 
             (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
         );
+        console.log("Salons trouvés :", TicketsChanel.map(c => `${c.name} (type: ${c.type})`));
         
         if (TicketsChanel.size === 0) {
             await message.channel.send("❌ Il n'y a pas de salon comportant : tickets");
