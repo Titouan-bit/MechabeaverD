@@ -32,12 +32,12 @@ const SendVerifTickets = async function(TicketsChanel, message) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     
     const row = new ActionRowBuilder();
+    const ticketEmbed = new EmbedBuilder()
+        .setTitle('Résultats de la recherche de chaine');
 
     let which = 0;
     if (TicketsChanel.size > 1) {
-        const ticketEmbed = new EmbedBuilder()
-            .setTitle('Résultats de la recherche de chaine')
-            .setDescription('Veuillez cliquer sur le bouton qui contient la chaine voulue pour le post de ticket')
+        ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient la chaine voulue pour le post de ticket')
         TicketsChanel.forEach((channel) => {
             const ticketsButton = new ButtonBuilder()
             .setCustomId(`select_channel_${channel.id}`)
@@ -48,9 +48,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         which = 1;
     } else {
         const channel = TicketsChanel.first();
-        const ticketEmbed = new EmbedBuilder()
-            .setTitle('Résultats de la recherche de chaine')
-            .setDescription(`chaine trouvée: ${channel.name}`)
+        ticketEmbed.setDescription(`chaine trouvée: ${channel.name}`);
         const ticketButtonG = new ButtonBuilder()
         .setCustomId(`good`)
             .setLabel('Good !')
