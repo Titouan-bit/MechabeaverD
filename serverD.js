@@ -106,8 +106,9 @@ client.on('messageCreate', async (message) => {
     }
 
     if (text === "/add-ticket") {
-        const TicketsChanel = message.guild.channels.cache.filter(
-            (channel) => channel.name.toLowerCase().includes('ticket') && 
+        const fetchedChannels = await message.guild.channels.fetch();
+        const TicketsChanel = fetchedChannels.filter(
+            (channel) => channel && channel.name.toLowerCase().includes('ticket') && 
             (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
         );
         console.log("Salons trouvés :", TicketsChanel.map(c => `${c.name} (type: ${c.type})`));
@@ -182,7 +183,3 @@ app.listen(port, () => {
     const DISCORD_TOKEN = process.env.DISCORD_TOKEN || "TOKEN";
     client.login(DISCORD_TOKEN);
 });
-
-
-
-// ephemeral: true
