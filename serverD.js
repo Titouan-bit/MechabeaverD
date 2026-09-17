@@ -89,8 +89,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         row.addComponents(ticketButtonG, ticketButtonF);
     }
 
-    await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
-    Time()
+
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
 }
 
@@ -156,7 +155,8 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: `✅ OK j'envoie le panneau de tickets dans : ${selectedChannel.name}`, ephemeral: true });
+        await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
+        Time()
     
     }
 
@@ -170,7 +170,8 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: `✅ OK j'envoie le panneau de tickets dans : ${selectedChannel.name}`, ephemeral: true });
+        await message.channel.send('Maintenant chosissez les thèmes des tickets avec choose !ticket-themes (themes séparés par une ,) dans les 3min')
+        Time()
     }
 
     if (interaction.customId === "false") {
