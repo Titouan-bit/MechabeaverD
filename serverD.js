@@ -116,12 +116,12 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    if (text.startsWith("!ticket-themes")) {
+    if (text.startsWith("/ticket-themes")) {
         if (Time) {
-            const args = text.slice("!ticket-themes".length).trim();
+            const args = text.slice("/ticket-themes".length).trim();
 
             if (!args) {
-                return await message.channel.reply("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: `!ticket-themes bug, question, autre`)");
+                return await message.channel.reply("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /!ticket-themes bug, question, autre`)");
             }
 
             const themes = args.split(',').map(theme => theme.trim());
@@ -166,7 +166,7 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: `✅ Salon sélectionné : ${selectedChannel.name}. Maintenant choisissez les thèmes avec \`!ticket-themes th1, th2\` dans les 3min`, ephemeral: true });
+        await message.channel.send('Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min');
         Time();
     }
 
