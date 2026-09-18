@@ -8,6 +8,7 @@ app.use(cors());
 app.use(express.json());
 
 const ticketthemes = [];
+const ModosRoles = []
 const uri = process.env.MONGO_URI || "mongodb+srv://cordetitouan_db_user:C4acjgzdyKx79C19@cluster0.0gs17s7.mongodb.net/discord_bot?appName=Cluster0";
 
 mongoose.connect(uri);
@@ -107,22 +108,24 @@ client.on('guildCreate', async (guild) => {
 
 client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
+    const isModo = message.member.roles.cache.some(role => 
+        ModosRoles.map(r => r.toLowerCase()).includes(role.name.toLowerCase())
+    );
     const text = message.content;
     
-    const admin = message.member.permissions.has(PermissionFlagsBits.Administrator);
 
     if (text === '/ping') {
         await message.reply('Pong! 🏓');
     }
 
     if (text === "/add-ticket") {
-        if (!admin) {
+        if (!isModo) {
             return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
         }
 
         const staffRole = message.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
         if (!staffRole) {
-            return message.reply("⚠️ Veuillez bien créer ou renommer un rôle en **Staff** sur ce serveur pour que le bot puisse fonctionner, puis relancez la commande !");
+            return message.reply("⚠️ Veuillez bien créer ou renommer un rôle en : Staff sur ce serveur pour que le bot puisse fonctionner, puis relancez la commande !");
         }
 
         const fetchedChannels = await message.guild.channels.fetch();
@@ -162,6 +165,27 @@ client.on('messageCreate', async (message) => {
 
         } else {
             await message.channel.send('❌ Tu as dépassé le temps relance la commande !');
+        }
+
+        if (text.startsWith('/def-modos')) {
+            const args = text.slice("/def-modos".length).trim();
+
+            if (!args) {
+                return await message.channel.send("❌ Tu dois indiquer des roles séparés par une virgule (ex: /def-modos apprentis-modo, modo-prime, goats)");
+            }
+
+            const modos = args.split(',').map(theme => theme.trim());
+
+            const invalidRoles = modos.filter(modoName => 
+                !message.guild.roles.cache.find(role => role.name.toLowerCase() === modoName.toLowerCase())
+            );
+
+            if (invalidRoles.length > 0) {
+                return await message.channel.send(`❌ Les rôles suivants n'existent pas sur ce serveur : ${invalidRoles.join(', ')}`);
+            }
+
+            await message.channel.send("✅ Rôles de modération enregistrés avec succès !");
+            ModosRoles.push(...modos);
         }
     }
 });
@@ -205,6 +229,7 @@ client.on('interactionCreate', async function(interaction) {
     }
 
     if (interaction.customId.startsWith('select_themes_')) {
+        const userName = interaction.user.username.toLowerCase();
         const theme = interaction.customId.replace('select_themes_', '');
 
         const staffRole = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
@@ -212,7 +237,7 @@ client.on('interactionCreate', async function(interaction) {
         const staffMention = staffRole ? `<@&${staffRole.id}>` : "@everyone";
 
         const Ticket = await interaction.guild.channels.create({
-            name: `ticket-${interaction.user.username}-${theme}`,
+            name: `ticket-${userName}-${theme}`,
             type: ChannelType.GuildText,
             permissionOverwrites: [
                 {
