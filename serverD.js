@@ -143,7 +143,7 @@ client.on('messageCreate', async (message) => {
     }
 
     if (text.startsWith("/ticket-themes")) {
-        if (!admin) {
+        if (!isModo) {
             return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
         }
         if (Time) {
@@ -167,26 +167,26 @@ client.on('messageCreate', async (message) => {
             await message.channel.send('❌ Tu as dépassé le temps relance la commande !');
         }
 
-        if (text.startsWith('/def-modos')) {
-            const args = text.slice("/def-modos".length).trim();
+    }
 
-            if (!args) {
-                return await message.channel.send("❌ Tu dois indiquer des roles séparés par une virgule (ex: /def-modos apprentis-modo, modo-prime, goats)");
-            }
+    if (text.startsWith('/def-modos')) {
+        const args = text.slice("/def-modos".length).trim();
 
-            const modos = args.split(',').map(theme => theme.trim());
-
-            const invalidRoles = modos.filter(modoName => 
-                !message.guild.roles.cache.find(role => role.name.toLowerCase() === modoName.toLowerCase())
-            );
-
-            if (invalidRoles.length > 0) {
-                return await message.channel.send(`❌ Les rôles suivants n'existent pas sur ce serveur : ${invalidRoles.join(', ')}`);
-            }
-
-            await message.channel.send("✅ Rôles de modération enregistrés avec succès !");
-            ModosRoles.push(...modos);
+        if (!args) {
+            return await message.channel.send("❌ Tu dois indiquer des roles séparés par une virgule (ex: /def-modos apprentis-modo, modo-prime, goats)");
         }
+
+        const modos = args.split(',').map(theme => theme.trim());
+
+        const invalidRoles = modos.filter(modoName => 
+            !message.guild.roles.cache.find(role => role.name.toLowerCase() === modoName.toLowerCase())
+        );
+        if (invalidRoles.length > 0) {
+            return await message.channel.send(`❌ Les rôles suivants n'existent pas sur ce serveur : ${invalidRoles.join(', ')}`);
+        }
+
+        await message.channel.send("✅ Rôles de modération enregistrés avec succès !");
+        ModosRoles.push(...modos);
     }
 });
 
