@@ -53,6 +53,25 @@ const SendTicket = async function(TicketChannel) {
     await TicketChannel.send({ embeds: [CreateticketEmbed], components: [row] });
 }
 
+const SendThemes = async function() {
+    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+
+    const row = new ActionRowBuilder();
+
+    const ticketEmbed = new EmbedBuilder()
+        .setTitle('Chosir un theme')
+        .setColor('#1E3A8A');
+
+        ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient votre demande');
+        ticketthemes.forEach((themes) => {
+            const ticketsThemesButton = new ButtonBuilder()
+                .setCustomId(`select_themes_${themes}`)
+                .setLabel(themes)
+                .setStyle(ButtonStyle.Success);
+            row.addComponents(ticketsThemesButton);
+        });
+    await channel.reply({ embeds: [ticketEmbed], components: [row] });
+}
 const SendVerifTickets = async function(TicketsChanel, message) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     
@@ -61,6 +80,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         .setTitle('Résultats de la recherche de chaine')
         .setColor('#1E3A8A');
 
+    
     if (TicketsChanel.size > 1) {
         ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient la chaine voulue pour le post de ticket');
         TicketsChanel.forEach((channel) => {
@@ -88,6 +108,10 @@ const SendVerifTickets = async function(TicketsChanel, message) {
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
 }
 
+const { PermissionFlagsBits } = require('discord.js');
+const { channel } = require('node:diagnostics_channel');
+const admin = message.member.permissions.has(PermissionFlagsBits.Administrator);
+
 client.on('guildCreate', async (guild) => {
     console.log(`🚀 Le bot a rejoint un nouveau serveur : ${guild.name}`);
 });
@@ -101,6 +125,9 @@ client.on('messageCreate', async (message) => {
     }
 
     if (text === "/add-ticket") {
+        if (!admin) {
+            return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+        }
         const fetchedChannels = await message.guild.channels.fetch();
         const TicketsChanel = fetchedChannels.filter(
             (channel) => channel && channel.name.toLowerCase().includes('ticket') && 
@@ -117,11 +144,13 @@ client.on('messageCreate', async (message) => {
     }
 
     if (text.startsWith("/ticket-themes")) {
+        if (!admin) {
+            return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+        }
         if (Time) {
             const args = text.slice("/ticket-themes".length).trim();
 
             if (!args) {
-                // CORRECTION ICI : Remplacement de .reply() par .send()
                 return await message.channel.send("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /ticket-themes bug, question, autre)");
             }
 
@@ -173,6 +202,10 @@ client.on('interactionCreate', async function(interaction) {
 
     if (interaction.customId === "false") {
         await interaction.reply({ content: '❌ Relance la commande et si le problème persiste mp moi et envoie @aide', ephemeral: true });
+    }
+
+    if (interaction.customId = "OpenTicket") {
+        await SendThemes()
     }
 });
 
