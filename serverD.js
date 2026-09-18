@@ -1,18 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const { Client, GatewayIntentBits, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { Client, GatewayIntentBits, ChannelType, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ticketthemes = []
+const ticketthemes = [];
 const uri = process.env.MONGO_URI || "mongodb+srv://cordetitouan_db_user:C4acjgzdyKx79C19@cluster0.0gs17s7.mongodb.net/discord_bot?appName=Cluster0";
 
-mongoose.connect(uri)
-  .then(() => console.log('🍃 Connecté à MongoDB (discord_bot) avec succès !'))
-  .catch((err) => console.error('❌ Erreur de connexion MongoDB :', err));
+mongoose.connect(uri);
 
 const client = new Client({
     intents: [
@@ -33,8 +31,6 @@ client.once('ready', () => {
 });
 
 const SendTicket = async function(TicketChannel) {
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-
     const CreateticketEmbed = new EmbedBuilder()
         .setTitle('Tickets')
         .setColor('#1E3A8A')
@@ -51,11 +47,9 @@ const SendTicket = async function(TicketChannel) {
     row.addComponents(OpenTicket);
 
     await TicketChannel.send({ embeds: [CreateticketEmbed], components: [row] });
-}
+};
 
 const SendThemes = async function(interaction) {
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-
     const row = new ActionRowBuilder();
 
     const ticketEmbed = new EmbedBuilder()
@@ -72,11 +66,9 @@ const SendThemes = async function(interaction) {
     });
     
     await interaction.reply({ embeds: [ticketEmbed], components: [row], ephemeral: true });
-}
+};
 
 const SendVerifTickets = async function(TicketsChanel, message) {
-    const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-    
     const row = new ActionRowBuilder();
     const ticketEmbed = new EmbedBuilder()
         .setTitle('Résultats de la recherche de chaine')
@@ -107,7 +99,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
     }
 
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
-}
+};
 
 client.on('guildCreate', async (guild) => {
     console.log(`🚀 Le bot a rejoint un nouveau serveur : ${guild.name}`);
@@ -117,7 +109,6 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     const text = message.content;
     
-    // Vérification de l'admin ici, où 'message' existe
     const admin = message.member.permissions.has(PermissionFlagsBits.Administrator);
 
     if (text === '/ping') {
@@ -128,12 +119,17 @@ client.on('messageCreate', async (message) => {
         if (!admin) {
             return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
         }
+
+        const staffRole = message.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
+        if (!staffRole) {
+            return message.reply("⚠️ Veuillez bien créer ou renommer un rôle en **Staff** sur ce serveur pour que le bot puisse fonctionner, puis relancez la commande !");
+        }
+
         const fetchedChannels = await message.guild.channels.fetch();
         const TicketsChanel = fetchedChannels.filter(
             (channel) => channel && channel.name.toLowerCase().includes('ticket') && 
             (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
         );
-        console.log("Salons trouvés :", TicketsChanel.map(c => `${c.name} (type: ${c.type})`));
         
         if (TicketsChanel.size === 0) {
             await message.channel.send("❌ Il n'y a pas de salon comportant : tickets");
@@ -204,9 +200,47 @@ client.on('interactionCreate', async function(interaction) {
         await interaction.reply({ content: '❌ Relance la commande et si le problème persiste mp moi et envoie @aide', ephemeral: true });
     }
 
-    // Correction de l'assignation (= au lieu de ===) et passage de l'interaction à SendThemes
     if (interaction.customId === "OpenTicket") {
         await SendThemes(interaction);
+    }
+
+    if (interaction.customId.startsWith('select_themes_')) {
+        const theme = interaction.customId.replace('select_themes_', '');
+
+        const staffRole = interaction.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
+        const staffRoleId = staffRole ? staffRole.id : interaction.guild.id;
+        const staffMention = staffRole ? `<@&${staffRole.id}>` : "@everyone";
+
+        const Ticket = await interaction.guild.channels.create({
+            name: `ticket-${interaction.user.username}-${theme}`,
+            type: ChannelType.GuildText,
+            permissionOverwrites: [
+                {
+                    id: interaction.guild.id,
+                    deny: [PermissionFlagsBits.ViewChannel],
+                },
+                {
+                    id: interaction.user.id,
+                    allow: [
+                        PermissionFlagsBits.ViewChannel,
+                        PermissionFlagsBits.SendMessages,
+                        PermissionFlagsBits.ReadMessageHistory
+                    ],
+                },
+                {
+                    id: staffRoleId,
+                    allow: [
+                        PermissionFlagsBits.ViewChannel,
+                        PermissionFlagsBits.SendMessages,
+                        PermissionFlagsBits.ReadMessageHistory
+                    ],
+                },
+            ],
+        });
+        
+        await Ticket.send(`${staffMention}, un nouveau ticket pour ${theme}`);
+        await Ticket.send(`<@${interaction.user.id}>, ton ticket a été pris en compte, un membre du staff va bientôt te répondre`);
+        await interaction.reply({ content: `✅ Ton salon a été créé : ${Ticket}`, ephemeral: true });
     }
 });
 
