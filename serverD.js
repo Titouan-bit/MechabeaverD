@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { Client, GatewayIntentBits, ChannelType } = require('discord.js');
+const { Client, GatewayIntentBits, ChannelType, PermissionFlagsBits } = require('discord.js');
 const mongoose = require('mongoose');
 
 const app = express();
@@ -53,25 +53,27 @@ const SendTicket = async function(TicketChannel) {
     await TicketChannel.send({ embeds: [CreateticketEmbed], components: [row] });
 }
 
-const SendThemes = async function() {
+const SendThemes = async function(interaction) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
     const row = new ActionRowBuilder();
 
     const ticketEmbed = new EmbedBuilder()
-        .setTitle('Chosir un theme')
-        .setColor('#1E3A8A');
+        .setTitle('Choisir un thème')
+        .setColor('#1E3A8A')
+        .setDescription('Veuillez cliquer sur le bouton qui contient votre demande');
 
-        ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient votre demande');
-        ticketthemes.forEach((themes) => {
-            const ticketsThemesButton = new ButtonBuilder()
-                .setCustomId(`select_themes_${themes}`)
-                .setLabel(themes)
-                .setStyle(ButtonStyle.Success);
-            row.addComponents(ticketsThemesButton);
-        });
-    await channel.reply({ embeds: [ticketEmbed], components: [row] });
+    ticketthemes.forEach((themes) => {
+        const ticketsThemesButton = new ButtonBuilder()
+            .setCustomId(`select_themes_${themes}`)
+            .setLabel(themes)
+            .setStyle(ButtonStyle.Success);
+        row.addComponents(ticketsThemesButton);
+    });
+    
+    await interaction.reply({ embeds: [ticketEmbed], components: [row], ephemeral: true });
 }
+
 const SendVerifTickets = async function(TicketsChanel, message) {
     const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
     
@@ -80,7 +82,6 @@ const SendVerifTickets = async function(TicketsChanel, message) {
         .setTitle('Résultats de la recherche de chaine')
         .setColor('#1E3A8A');
 
-    
     if (TicketsChanel.size > 1) {
         ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient la chaine voulue pour le post de ticket');
         TicketsChanel.forEach((channel) => {
@@ -108,10 +109,6 @@ const SendVerifTickets = async function(TicketsChanel, message) {
     await message.channel.send({ embeds: [ticketEmbed], components: [row] });
 }
 
-const { PermissionFlagsBits } = require('discord.js');
-const { channel } = require('node:diagnostics_channel');
-const admin = message.member.permissions.has(PermissionFlagsBits.Administrator);
-
 client.on('guildCreate', async (guild) => {
     console.log(`🚀 Le bot a rejoint un nouveau serveur : ${guild.name}`);
 });
@@ -120,6 +117,9 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
     const text = message.content;
     
+    // Vérification de l'admin ici, où 'message' existe
+    const admin = message.member.permissions.has(PermissionFlagsBits.Administrator);
+
     if (text === '/ping') {
         await message.reply('Pong! 🏓');
     }
@@ -204,8 +204,9 @@ client.on('interactionCreate', async function(interaction) {
         await interaction.reply({ content: '❌ Relance la commande et si le problème persiste mp moi et envoie @aide', ephemeral: true });
     }
 
-    if (interaction.customId = "OpenTicket") {
-        await SendThemes()
+    // Correction de l'assignation (= au lieu de ===) et passage de l'interaction à SendThemes
+    if (interaction.customId === "OpenTicket") {
+        await SendThemes(interaction);
     }
 });
 
