@@ -119,9 +119,14 @@ client.on('messageCreate', async (message) => {
             return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
         }
 
-        const staffRole = message.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
-        if (!staffRole) {
-            return message.reply("⚠️ Veuillez bien créer ou renommer un rôle en : Staff sur ce serveur pour que le bot puisse fonctionner, puis relancez la commande !");
+        const staffRole = message.guild.roles.cache.find(role => role.name.toLowerCase().includes('staff'|| 'Staff'));
+
+        if (!isModo) {
+            return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+        } else {
+            if (!staffRole) {
+                return message.reply("⚠️ Veuillez bien créer ou renommer un rôle en : Staff sur ce serveur pour que le bot puisse fonctionner, puis relancez la commande !");
+            }
         }
 
         const fetchedChannels = await message.guild.channels.fetch();
