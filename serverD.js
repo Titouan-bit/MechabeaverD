@@ -53,8 +53,9 @@ client.once('ready', () => {
 
 const CloseTicket = async function (Ticket) {
     const CloseMessage = await Ticket.send({ components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('close_ticket').setLabel('Close').setEmoji('🔒').setStyle(ButtonStyle.Danger))]});
-    await CloseMessage.pin()
+    await CloseMessage.pin().catch(err => console.error('Erreur épinglage:', err));
 };
+
 const SendTicket = async function(ticketChannel) {
     const CreateticketEmbed = new EmbedBuilder()
         .setTitle('Tickets')
@@ -94,7 +95,6 @@ const SendThemes = async function(interaction, config) {
     await interaction.reply({ embeds: [ticketEmbed], components: [row], ephemeral: true });
 };
 
-// Envoie les salons trouvés par groupes de 5 boutons (limite Discord par ligne)
 const SendVerifTickets = async function(TicketsChanel, message) {
     const ticketEmbed = new EmbedBuilder()
         .setTitle('Résultats de la recherche de chaine')
@@ -105,7 +105,7 @@ const SendVerifTickets = async function(TicketsChanel, message) {
     if (TicketsChanel.size > 1) {
         ticketEmbed.setDescription('Veuillez cliquer sur le bouton qui contient la chaine voulue pour le post de ticket');
 
-        const channels = [...TicketsChanel.values()].slice(0, 25); // 25 = max Discord (5 lignes x 5)
+        const channels = [...TicketsChanel.values()].slice(0, 25);
         for (let i = 0; i < channels.length; i += 5) {
             const row = new ActionRowBuilder();
             channels.slice(i, i + 5).forEach((channel) => {
@@ -329,18 +329,25 @@ client.on('interactionCreate', async function(interaction) {
 
             await Ticket.send(`${staffMention}, un nouveau ticket pour ${theme}`);
             await Ticket.send(`<@${interaction.user.id}>, ton ticket a été pris en compte, un membre du staff va bientôt te répondre`);
-            await CloseTicket()
-            
+            await interaction.reply({ content: `✅ Ton salon a été créé : ${Ticket}`, ephemeral: true });
+            await CloseTicket(Ticket);
+        }
+
+        if (interaction.customId === "close_ticket") {
+            await interaction.reply('🔒 Fermeture du ticket dans 5 secondes...');
+            setTimeout(async () => {
+                try {
+                    await interaction.channel.delete('Ticket fermé');
+                } catch (err) {
+                    console.error('Erreur suppression salon:', err);
+                }
+            }, 5000);
         }
     } catch (err) {
         console.error('Erreur interactionCreate:', err);
         if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
             await interaction.reply({ content: '❌ Une erreur est survenue.', ephemeral: true }).catch(() => {});
         }
-    }
-
-    if (interaction.customId === "close_ticket") {
-        await Ticket.delete('Ticket fermé');
     }
 });
 
