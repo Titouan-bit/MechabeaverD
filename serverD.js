@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ⚠️ Mets ton URI Mongo dans une variable d'environnement, ne la laisse jamais en dur ici.
 const uri = process.env.MONGO_URI;
 if (!uri) {
     console.error('❌ MONGO_URI manquant dans les variables d\'environnement.');
@@ -18,7 +17,6 @@ mongoose.connect(uri)
     .then(() => console.log('✅ Connecté à MongoDB'))
     .catch((err) => console.error('❌ Erreur connexion MongoDB:', err));
 
-// --- Modèle de config, une entrée par serveur ---
 const configSchema = new mongoose.Schema({
     guildId: { type: String, required: true, unique: true },
     ticketChannelId: { type: String, default: null },
@@ -35,7 +33,6 @@ async function getConfig(guildId) {
     return config;
 }
 
-// --- Attrape les crashs silencieux au lieu de laisser mourir le process ---
 process.on('unhandledRejection', (err) => console.error('❌ Unhandled rejection:', err));
 process.on('uncaughtException', (err) => console.error('❌ Uncaught exception:', err));
 
@@ -54,6 +51,10 @@ client.once('ready', () => {
     console.log(`🤖 Bot Discord connecté en tant que ${client.user.tag} !`);
 });
 
+const CloseTicket = async function (Ticket) {
+    const CloseMessage = await Ticket.send({ components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId('close_ticket').setLabel('Close').setEmoji('🔒').setStyle(ButtonStyle.Danger))]});
+    await CloseMessage.pin()
+};
 const SendTicket = async function(ticketChannel) {
     const CreateticketEmbed = new EmbedBuilder()
         .setTitle('Tickets')
@@ -155,7 +156,7 @@ client.on('messageCreate', async (message) => {
                 return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
             }
 
-            await message.guild.roles.fetch(); // rafraîchit le cache des rôles
+            await message.guild.roles.fetch();
             let staffRole = message.guild.roles.cache.find(role => role.name.toLowerCase() === 'staff');
 
             if (!staffRole) {
@@ -186,7 +187,7 @@ client.on('messageCreate', async (message) => {
             const TicketsChanel = fetchedChannels.filter(
                 (channel) => channel
                     && channel.name.toLowerCase().includes('ticket')
-                    && !channel.name.toLowerCase().startsWith('ticket-') // exclut les tickets déjà ouverts
+                    && !channel.name.toLowerCase().startsWith('ticket-')
                     && (channel.type === ChannelType.GuildText || channel.type === ChannelType.GuildAnnouncement)
             );
 
@@ -328,13 +329,18 @@ client.on('interactionCreate', async function(interaction) {
 
             await Ticket.send(`${staffMention}, un nouveau ticket pour ${theme}`);
             await Ticket.send(`<@${interaction.user.id}>, ton ticket a été pris en compte, un membre du staff va bientôt te répondre`);
-            await interaction.reply({ content: `✅ Ton salon a été créé : ${Ticket}`, ephemeral: true });
+            await CloseTicket()
+            
         }
     } catch (err) {
         console.error('Erreur interactionCreate:', err);
         if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
             await interaction.reply({ content: '❌ Une erreur est survenue.', ephemeral: true }).catch(() => {});
         }
+    }
+
+    if (interaction.customId === "close_ticket") {
+        await Ticket.delete('Ticket fermé');
     }
 });
 
