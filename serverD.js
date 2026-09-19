@@ -150,6 +150,7 @@ client.on('messageCreate', async (message) => {
         }
 
         const themes = args.split(',').map(theme => theme.trim());
+        ticketthemes.length = 0;
         ticketthemes.push(...themes);
 
         await message.channel.send('✅ thèmes mis à jour ! J\'envoie le message');
