@@ -21,10 +21,6 @@ const client = new Client({
     ]
 });
 
-const Time = function () {
-    const time = Date.now() + (30 * 24 * 60 * 60 * 1000);
-};
-
 let TicketChannel = null;
 
 client.once('ready', () => {
@@ -146,25 +142,21 @@ client.on('messageCreate', async (message) => {
         if (!isModo) {
             return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
         }
-        if (Time) {
-            const args = text.slice("/ticket-themes".length).trim();
 
-            if (!args) {
-                return await message.channel.send("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /ticket-themes bug, question, autre)");
-            }
+        const args = text.slice("/ticket-themes".length).trim();
 
-            const themes = args.split(',').map(theme => theme.trim());
-            ticketthemes.push(...themes);
+        if (!args) {
+            return await message.channel.send("❌ Tu dois indiquer des thèmes séparés par une virgule (ex: /ticket-themes bug, question, autre)");
+        }
 
-            await message.channel.send('✅ thèmes mis à jour ! J\'envoie le message');
-            if (TicketChannel) {
-                await SendTicket(TicketChannel);
-            } else {
-                await message.channel.send('❌ Aucun salon de ticket n\'a été sélectionné au préalable.');
-            }
+        const themes = args.split(',').map(theme => theme.trim());
+        ticketthemes.push(...themes);
 
+        await message.channel.send('✅ thèmes mis à jour ! J\'envoie le message');
+        if (TicketChannel) {
+            await SendTicket(TicketChannel);
         } else {
-            await message.channel.send('❌ Tu as dépassé le temps relance la commande !');
+            await message.channel.send('❌ Aucun salon de ticket n\'a été sélectionné au préalable.');
         }
 
     }
@@ -202,8 +194,7 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min', ephemeral: true });
-        Time();
+        await interaction.reply({ content: 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,)', ephemeral: true });
     }
 
     if (interaction.customId === "good") {
@@ -216,8 +207,7 @@ client.on('interactionCreate', async function(interaction) {
         }
 
         TicketChannel = selectedChannel;
-        await interaction.reply({ content: 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,) dans les 3min', ephemeral: true });
-        Time();
+        await interaction.reply({ content: 'Maintenant chosissez les thèmes des tickets avec /ticket-themes (themes séparés par une ,)', ephemeral: true });
     }
 
     if (interaction.customId === "false") {
@@ -265,7 +255,6 @@ client.on('interactionCreate', async function(interaction) {
         
         await Ticket.send(`${staffMention}, un nouveau ticket pour ${theme}`);
         await Ticket.send(`<@${interaction.user.id}>, ton ticket a été pris en compte, un membre du staff va bientôt te répondre`);
-        await interaction.reply({ content: `✅ Ton salon a été créé : ${Ticket}`, ephemeral: true });
     }
 });
 
