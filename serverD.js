@@ -25,6 +25,13 @@ const configSchema = new mongoose.Schema({
 });
 const GuildConfig = mongoose.model('GuildConfig', configSchema);
 
+const userSchema = new mongoose.Schema({
+    userId: { type: String, required: true },
+    guildId: { type: String, required: true, unique: true },
+    username: { type: String, required: true },
+});
+const UserData = mongoose.model('UserData', userSchema);
+
 async function getConfig(guildId) {
     let config = await GuildConfig.findOne({ guildId });
     if (!config) {
@@ -40,7 +47,8 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ]
 });
 
@@ -49,6 +57,10 @@ client.on('shardDisconnect', (e, id) => console.error(`❌ Shard ${id} déconnec
 
 client.once('ready', () => {
     console.log(`🤖 Bot Discord connecté en tant que ${client.user.tag} !`);
+});
+
+client.on('guildMemberAdd', async (member) => {
+
 });
 
 const CloseTicket = async function (Ticket) {
@@ -370,3 +382,7 @@ app.listen(port, () => {
     }
     client.login(DISCORD_TOKEN);
 });
+setInterval(() => {
+    http.get(`http://localhost:${port}/ping`, (res) => {}).on('error', () => {});
+    https.get('https://mechabeaverd.onrender.com/ping', (res) => {}).on('error', () => {});
+}, 5 * 60 * 1000);
