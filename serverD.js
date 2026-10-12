@@ -13,6 +13,7 @@ if (!uri) {
     process.exit(1);
 }
 
+let s0urceChannel = null;
 mongoose.connect(uri)
     .then(() => console.log('✅ Connecté à MongoDB'))
     .catch((err) => console.error('❌ Erreur connexion MongoDB:', err));
@@ -20,6 +21,7 @@ mongoose.connect(uri)
 const configSchema = new mongoose.Schema({
     guildId: { type: String, required: true, unique: true },
     ticketChannelId: { type: String, default: null },
+    s0urceChannelId: { type: String, default: null },
     themes: { type: [String], default: [] },
     modoRoles: { type: [String], default: [] }
 });
@@ -258,6 +260,15 @@ client.on('messageCreate', async (message) => {
             await config.save();
             await message.channel.send("✅ Rôles de modération enregistrés avec succès !");
         }
+        if (text === '/s0urceHere') {
+            config.s0urceChannelId = message.channel.id;
+            s0urceChannel = message.channel;
+            await config.save();
+            if (s0urceChannel) {
+                await message.channel.send('Success, the channel have been defined for s0urce');
+            }
+
+        }
     } catch (err) {
         console.error('Erreur messageCreate:', err);
     }
@@ -386,3 +397,31 @@ setInterval(() => {
     http.get(`http://localhost:${port}/ping`, (res) => {}).on('error', () => {});
     https.get('https://mechabeaverd.onrender.com/ping', (res) => {}).on('error', () => {});
 }, 5 * 60 * 1000);
+
+
+
+
+app.post('/sendTime', async (req, res) => {
+    res.sendStatus(200);
+
+    const delai = 2 * 60; 
+
+    setTimeout(async () => {
+        try { 
+            if (!s0urceChannel) {
+                const config = await GuildConfig.findOne({});
+                if (config && config.s0urceChannelId) {
+                    s0urceChannel = await client.channels.fetch(config.s0urceChannelId).catch(() => null);
+                }
+            }
+            if (s0urceChannel) {
+                await s0urceChannel.send('Il est temps de looter les agents !');
+            } else {
+                console.log('❌ Aucun salon s0urce n\'a été trouvé.');
+            }
+        }
+        catch (err) {
+            console.error('Erreur lors de l\'envoi du message s0urce:', err);
+        }
+    }, delai);
+});
