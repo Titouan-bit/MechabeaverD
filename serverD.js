@@ -272,6 +272,10 @@ client.on('messageCreate', async (message) => {
     } catch (err) {
         console.error('Erreur messageCreate:', err);
     }
+
+    if (text.startsWith('/s0urceName')) {
+        
+    }
 });
 
 client.on('interactionCreate', async function(interaction) {
@@ -399,12 +403,10 @@ setInterval(() => {
 }, 5 * 60 * 1000);
 
 
-
-
 app.post('/sendTime', async (req, res) => {
     res.sendStatus(200);
 
-    const delai = 2 * 60; 
+    const delai = 2 * 60 * 60 * 1000;
 
     setTimeout(async () => {
         try { 
