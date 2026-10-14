@@ -508,7 +508,7 @@ app.post('/sendTime', async (req, res) => {
     if (!user) {
         return;
     }
-    const delai = 2 * 60 * 60 * 1000;
+    const delai = 2 * 60;
 
     setTimeout(async () => {
         try { 
@@ -537,7 +537,7 @@ app.post('/sendTime2', async (req, res) => {
     if (!user) {
         return;
     }
-    const delai = 2 * 60 * 60 * 1000;
+    const delai = 2 * 60;
 
     setTimeout(async () => {
         try { 
