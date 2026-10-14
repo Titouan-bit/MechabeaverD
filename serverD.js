@@ -486,6 +486,9 @@ app.listen(port, () => {
         process.exit(1);
     }
     client.login(DISCORD_TOKEN);
+    client.on('debug', (info) => console.log('[debug]', info));
+    client.on('shardError', (err) => console.error('❌ shardError:', err));
+    client.login(DISCORD_TOKEN).catch((err) => console.error('❌ Login échoué:', err));
 });
 setInterval(() => {
     http.get(`http://localhost:${port}/ping`, (res) => {}).on('error', () => {});
