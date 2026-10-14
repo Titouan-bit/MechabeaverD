@@ -496,7 +496,7 @@ app.listen(port, () => {
 });
 setInterval(() => {
     http.get(`http://localhost:${port}/ping`, (res) => {}).on('error', () => {});
-    https.get('https://mechabeaverd.onrender.com/ping', (res) => {}).on('error', () => {});
+    https.get('https://mechabeaverd-mm41.onrender.com', (res) => {}).on('error', () => {});
 }, 5 * 60 * 1000);
 
 
