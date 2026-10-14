@@ -482,6 +482,7 @@ app.get('/', (req, res) => {
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`🚀 Serveur web Discord actif sur le port ${port}`);
+    fetch('https://discord.com/api/v10/gateway').then(r => console.log('[test] status', r.status)).catch(e => console.log('[test] erreur', e.message));
 
     const DISCORD_TOKEN = process.env.DISCORD_TOKEN;
     if (!DISCORD_TOKEN) {
