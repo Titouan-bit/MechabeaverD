@@ -12,6 +12,9 @@ if (!uri) {
     console.error('❌ MONGO_URI manquant dans les variables d\'environnement.');
     process.exit(1);
 }
+const http = require('http');
+const https = require('https');
+
 const lvl1 = 0;
 const lvl2 = 30;
 const lvl3 = 90;
