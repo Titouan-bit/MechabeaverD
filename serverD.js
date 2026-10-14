@@ -490,6 +490,7 @@ app.listen(port, () => {
     }
     client.on('debug', (info) => console.log('[debug]', info));
     client.on('shardError', (err) => console.error('❌ shardError:', err));
+    client.rest.on('rateLimited', (info) => console.log('[rateLimit]', info));
     client.login(DISCORD_TOKEN).catch((err) => console.error('❌ Login échoué:', err));
 });
 setInterval(() => {
