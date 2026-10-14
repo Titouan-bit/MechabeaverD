@@ -12,6 +12,18 @@ if (!uri) {
     console.error('❌ MONGO_URI manquant dans les variables d\'environnement.');
     process.exit(1);
 }
+const lvl1 = 0;
+const lvl2 = 30;
+const lvl3 = 90;
+const lvl4 = 200;
+const lvl5 = 400;
+const lvl6 = 650;
+const lvl7 = 850;
+const lvl8 = 1150;
+const lvl9 = 1450;
+const lvl10 = 1700;
+const lvl11 = 2000;
+const lvl12 = 2150;
 
 let s0urceChannel = null;
 mongoose.connect(uri)
@@ -29,10 +41,18 @@ const GuildConfig = mongoose.model('GuildConfig', configSchema);
 
 const userSchema = new mongoose.Schema({
     userId: { type: String, required: true },
-    guildId: { type: String, required: true, unique: true },
+    guildId: { type: String, required: true },
     username: { type: String, required: true },
+    xp: {type: Number, default: 0},
+    Level: {type: Number, default: 0}
 });
+userSchema.index({ userId: 1, guildId: 1 }, { unique: true });
 const UserData = mongoose.model('UserData', userSchema);
+const s0urceUserSchema = new mongoose.Schema({
+    s0urceName: { type: String, required: true, unique: true },
+    discordId: { type: String, required: true }
+});
+const S0urceUser = mongoose.model('S0urceUser', s0urceUserSchema);
 
 async function getConfig(guildId) {
     let config = await GuildConfig.findOne({ guildId });
@@ -160,6 +180,71 @@ client.on('messageCreate', async (message) => {
         );
         const text = message.content;
 
+        let sender = await UserData.findOne({ userId: message.author.id, guildId: message.guild.id });
+        if (!sender) sender = new UserData({ userId: message.author.id, guildId: message.guild.id, username: message.author.username });
+        sender.xp += 15;
+        if (sender.xp >= lvl1 && sender.Level < 1) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 1'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl2 && sender.Level < 2) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 2'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl3 && sender.Level < 3) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 3'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl4 && sender.Level < 4) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 4'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl5 && sender.Level < 5) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 5'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl6 && sender.Level < 6) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 6'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl7 && sender.Level < 7) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 7'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl8 && sender.Level < 8) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 8'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl9 && sender.Level < 9) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 9'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl10 && sender.Level < 10) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 10'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl11 && sender.Level < 11) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 11'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        if (sender.xp >= lvl12 && sender.Level < 12) {
+            sender.Level += 1;
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 12'));
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+        }
+        await sender.save();
+
         if (text === '/ping') {
             await message.reply('Pong! 🏓');
             return;
@@ -269,13 +354,18 @@ client.on('messageCreate', async (message) => {
             }
 
         }
+        if (text.startsWith('/s0urceName')) {
+            const pseudo = text.slice('/s0urceName'.length).trim().toLowerCase();
+            await S0urceUser.findOneAndUpdate(
+                { s0urceName: pseudo },
+                { s0urceName: pseudo, discordId: message.author.id },
+                { upsert: true }
+            );
+            await message.reply('✅ Pseudo associé !');
+        }
     } catch (err) {
         console.error('Erreur messageCreate:', err);
-    }
-
-    if (text.startsWith('/s0urceName')) {
-        
-    }
+    }   
 });
 
 client.on('interactionCreate', async function(interaction) {
@@ -406,6 +496,11 @@ setInterval(() => {
 app.post('/sendTime', async (req, res) => {
     res.sendStatus(200);
 
+    const pseudo = (req.body.realUsername || '').toLowerCase();
+    const user = await S0urceUser.findOne({ s0urceName: pseudo });
+    if (!user) {
+        return;
+    }
     const delai = 2 * 60 * 60 * 1000;
 
     setTimeout(async () => {
@@ -417,7 +512,36 @@ app.post('/sendTime', async (req, res) => {
                 }
             }
             if (s0urceChannel) {
-                await s0urceChannel.send('Il est temps de looter les agents !');
+                await s0urceChannel.send(`<@${user.discordId}>, il est temps de looter les agents !`);
+            } else {
+                console.log('❌ Aucun salon s0urce n\'a été trouvé.');
+            }
+        }
+        catch (err) {
+            console.error('Erreur lors de l\'envoi du message s0urce:', err);
+        }
+    }, delai);
+});
+app.post('/sendTime2', async (req, res) => {
+    res.sendStatus(200);
+
+    const pseudo = (req.body.realUsername || '').toLowerCase();
+    const user = await S0urceUser.findOne({ s0urceName: pseudo });
+    if (!user) {
+        return;
+    }
+    const delai = 2 * 60 * 60 * 1000;
+
+    setTimeout(async () => {
+        try { 
+            if (!s0urceChannel) {
+                const config = await GuildConfig.findOne({});
+                if (config && config.s0urceChannelId) {
+                    s0urceChannel = await client.channels.fetch(config.s0urceChannelId).catch(() => null);
+                }
+            }
+            if (s0urceChannel) {
+                await s0urceChannel.send(`<@${user.discordId}>, il est temps de looter les agents !`);
             } else {
                 console.log('❌ Aucun salon s0urce n\'a été trouvé.');
             }
