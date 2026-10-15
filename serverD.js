@@ -14,19 +14,17 @@ if (!uri) {
 }
 const http = require('http');
 const https = require('https');
+const jokes = [
+    "Why don't scientists trust atoms? Because they make up everything! ⚛️",
+    "I told my doctor that I broke my arm in two places. He told me to stop going to those places 🏥",
+    "Why do we tell actors to 'break a leg'? Because every play has a cast 🎭",
+    "What do you call a fake noodle? An impasta 🍝",
+    "Why don't eggs tell jokes? They'd crack each other up 🥚",
+    "My wife told me to stop impersonating a flamingo. I had to put my foot down 🦩"
+]
 
-const lvl1 = 0;
-const lvl2 = 30;
-const lvl3 = 90;
-const lvl4 = 200;
-const lvl5 = 400;
-const lvl6 = 650;
-const lvl7 = 850;
-const lvl8 = 1150;
-const lvl9 = 1450;
-const lvl10 = 1700;
-const lvl11 = 2000;
-const lvl12 = 2150;
+let xpNeeded = 0;
+let xpPerMessage = 0;
 
 let s0urceChannel = null;
 mongoose.connect(uri)
@@ -185,72 +183,38 @@ client.on('messageCreate', async (message) => {
 
         let sender = await UserData.findOne({ userId: message.author.id, guildId: message.guild.id });
         if (!sender) sender = new UserData({ userId: message.author.id, guildId: message.guild.id, username: message.author.username });
-        sender.xp += 15;
-        if (sender.xp >= lvl1 && sender.Level < 1) {
+        sender.xp += xpPerMessage;
+        if (sender.xp >= 100) {
             sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 1'));
+            message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Level ${sender.Level}`));
             await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl2 && sender.Level < 2) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 2'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl3 && sender.Level < 3) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 3'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl4 && sender.Level < 4) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 4'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl5 && sender.Level < 5) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 5'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl6 && sender.Level < 6) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 6'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl7 && sender.Level < 7) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 7'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl8 && sender.Level < 8) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 8'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl9 && sender.Level < 9) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 9'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl10 && sender.Level < 10) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 10'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl11 && sender.Level < 11) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 11'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
-        }
-        if (sender.xp >= lvl12 && sender.Level < 12) {
-            sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === 'Level 12'));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+            sender.xp = 0;
         }
         await sender.save();
 
         if (text === '/ping') {
+            if (!isModo) {
+                return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+            }
             await message.reply('Pong! 🏓');
             return;
+        }
+        if (text.startsWith('/defxpLevel')) {
+            if (!isModo) {
+                return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+            }
+            const xpwanted = text.replace('/defxpLevel', '');
+            xpNeeded = xpwanted;
+            await message.reply(`Maintenant les utilisateurs gagneront un niveau tous les ${xpwanted}xp`);
+        }
+
+        if (text.startsWith('/defxpMessage')) {
+            if (!isModo) {
+                return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
+            }
+            const xpMessage = text.replace('/defxpMessage', '');
+            await message.reply(`Maintenant les utilisateurs gagneront ${xpMessage}xp par message`);
+            xpPerMessage = xpMessage;
         }
 
         if (text === "/add-ticket") {
@@ -299,6 +263,12 @@ client.on('messageCreate', async (message) => {
             } else {
                 await SendVerifTickets(TicketsChanel, message);
             }
+        }
+        if (text === '/joke') {
+            const joke = jokes[Math.floor(Math.random() * jokes.length)];
+            await sleep(2000);
+            await sendMessageAutoDelete(senderNumber, { text: joke });
+            return;
         }
 
         if (text.startsWith("/ticket-themes")) {
