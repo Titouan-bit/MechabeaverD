@@ -184,7 +184,7 @@ client.on('messageCreate', async (message) => {
         let sender = await UserData.findOne({ userId: message.author.id, guildId: message.guild.id });
         if (!sender) sender = new UserData({ userId: message.author.id, guildId: message.guild.id, username: message.author.username });
         sender.xp += xpPerMessage;
-        if (sender.xp >= 100) {
+        if (sender.xp >= xpNeeded) {
             sender.Level += 1;
             message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Level ${sender.Level}`));
             await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
@@ -204,7 +204,7 @@ client.on('messageCreate', async (message) => {
                 return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
             }
             const xpwanted = text.replace('/defxpLevel', '');
-            xpNeeded = xpwanted;
+            xpNeeded = parseInt(xpwanted);
             await message.reply(`Maintenant les utilisateurs gagneront un niveau tous les ${xpwanted}xp`);
         }
 
@@ -214,7 +214,7 @@ client.on('messageCreate', async (message) => {
             }
             const xpMessage = text.replace('/defxpMessage', '');
             await message.reply(`Maintenant les utilisateurs gagneront ${xpMessage}xp par message`);
-            xpPerMessage = xpMessage;
+            xpPerMessage = parseInt(xpMessage);
         }
 
         if (text === "/add-ticket") {
@@ -266,8 +266,7 @@ client.on('messageCreate', async (message) => {
         }
         if (text === '/joke') {
             const joke = jokes[Math.floor(Math.random() * jokes.length)];
-            await sleep(2000);
-            await sendMessageAutoDelete(senderNumber, { text: joke });
+            await message.channel.send(senderNumber, { text: joke });
             return;
         }
 
