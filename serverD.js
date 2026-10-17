@@ -477,7 +477,7 @@ app.post('/sendTime', async (req, res) => {
     if (!user) {
         return;
     }
-    const delai = 2 * 60;
+    const delai = timeTowait;
 
     setTimeout(async () => {
         try { 
