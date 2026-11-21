@@ -201,7 +201,7 @@ client.on('messageCreate', async (message) => {
         }
         await sender.save();
 
-        if (message.member.roles.cache.has('1573733636438630532')){
+        if (message.member.roles.cache.has('1573733636438630532') && message.channel.id === '1573626473896742962'){
             setTimeout(async () => {
                 try {
                     const channel = await client.channels.fetch(bumpchannelId);
