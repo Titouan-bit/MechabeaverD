@@ -23,11 +23,11 @@ const jokes = [
     "My wife told me to stop impersonating a flamingo. I had to put my foot down 🦩"
 ]
 
-let xpNeeded = 500;
 let xpPerMessage = 10;
 
 let Botchannel = null;
 const bumpchannelId = '1573626473896742962';
+const niveauchannelID = '1573059116170223668';
 mongoose.connect(uri)
     .then(() => console.log('✅ Connecté à MongoDB'))
     .catch((err) => console.error('❌ Erreur connexion MongoDB:', err));
@@ -46,7 +46,9 @@ const userSchema = new mongoose.Schema({
     guildId: { type: String, required: true },
     username: { type: String, required: true },
     xp: {type: Number, default: 0},
-    Level: {type: Number, default: 0}
+    Level: {type: Number, default: 0},
+    totalxp: {type: Number, default: 0},
+    xpNeeded: {type: Number, default: 100}
 });
 userSchema.index({ userId: 1, guildId: 1 }, { unique: true });
 const UserData = mongoose.model('UserData', userSchema);
@@ -193,10 +195,12 @@ client.on('messageCreate', async (message) => {
         let sender = await UserData.findOne({ userId: message.author.id, guildId: message.guild.id });
         if (!sender) sender = new UserData({ userId: message.author.id, guildId: message.guild.id, username: message.author.username });
         sender.xp += xpPerMessage;
-        if (sender.xp >= xpNeeded) {
+        totalxp = sender.xp;
+        if (sender.xp >= sender.xpNeeded) {
+            sender.xpNeeded *= 1.7;
             sender.Level += 1;
             message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Level ${sender.Level}`));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé niveau ${sender.Level}`);
+            await niveauchannelID.send(`congrats: <@${message.author.id}> Est passé niveau ${sender.Level}`);
             sender.xp = 0;
         }
         await sender.save();
@@ -212,6 +216,9 @@ client.on('messageCreate', async (message) => {
                     console.error('Erreur envoi bump:', err);
                 }
             }, 7200000);
+        }
+        if (text === 'niveau'){
+            await niveauchannelID.send(`Tu es niveau: ${sender.Level} avec ${totalxp}xp au total, prochain niveau --> (${sender.xp}/${sender.xpNeeded})`)
         }
         if (text === '/ping') {
             if (!isModo) {
