@@ -211,7 +211,7 @@ client.on('messageCreate', async (message) => {
                 } catch (err) {
                     console.error('Erreur envoi bump:', err);
                 }
-            }, 7200000);
+            }, 200);
         }
         if (text === '/ping') {
             if (!isModo) {
