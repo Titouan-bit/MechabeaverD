@@ -199,8 +199,11 @@ client.on('messageCreate', async (message) => {
         if (sender.xp >= sender.xpNeeded) {
             sender.xpNeeded *= 1.7;
             sender.Level += 1;
-            message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Level ${sender.Level}`));
-            await niveauchannelID.send(`congrats: <@${message.author.id}> Est passé niveau ${sender.Level}`);
+            if (sender.Level == 1) {
+                message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Petit parleur`));
+            }
+            const niveauChannel = await client.channels.fetch(niveauchannelID).catch(() => null);
+            await niveauChannel.send(`congrats: <@${message.author.id}> Est passé niveau ${sender.Level}`);
             sender.xp = 0;
         }
         await sender.save();
@@ -218,7 +221,7 @@ client.on('messageCreate', async (message) => {
             }, 7200000);
         }
         if (text === 'niveau'){
-            await niveauchannelID.send(`Tu es niveau: ${sender.Level} avec ${totalxp}xp au total, prochain niveau --> (${sender.xp}/${sender.xpNeeded})`)
+            await message.channel.send(`Tu es niveau: ${sender.Level} avec ${totalxp}xp au total, prochain niveau --> (${sender.xp}/${sender.xpNeeded})`)
         }
         if (text === '/ping') {
             if (!isModo) {
