@@ -26,7 +26,8 @@ const jokes = [
 let xpNeeded = 0;
 let xpPerMessage = 0;
 
-let s0urceChannel = null;
+let Botchannel = null;
+const bumpchannelId = '1573626473896742962';
 mongoose.connect(uri)
     .then(() => console.log('✅ Connecté à MongoDB'))
     .catch((err) => console.error('❌ Erreur connexion MongoDB:', err));
@@ -34,7 +35,7 @@ mongoose.connect(uri)
 const configSchema = new mongoose.Schema({
     guildId: { type: String, required: true, unique: true },
     ticketChannelId: { type: String, default: null },
-    s0urceChannelId: { type: String, default: null },
+    BotchannelId: { type: String, default: null },
     themes: { type: [String], default: [] },
     modoRoles: { type: [String], default: [] }
 });
@@ -50,8 +51,16 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ userId: 1, guildId: 1 }, { unique: true });
 const UserData = mongoose.model('UserData', userSchema);
 const s0urceUserSchema = new mongoose.Schema({
-    s0urceName: { type: String, required: true, unique: true },
-    discordId: { type: String, required: true }
+    jeuNom: { type: String, required: true, unique: true },
+    discordId: { type: String, required: true },
+    Attaque: { type: Number, default: 0 },
+    Defense: { type: Number, default: 0 },
+    habitants: { type: Number, default: 0 },
+    bonheur: { type: Number, default: 0 },
+    ville: { type: [String], default: [] },
+    gold: { type: Number, default: 0 },
+    surface: { type: Number, default: 0 },
+    multi: { type: Boolean, default: false }
 });
 const S0urceUser = mongoose.model('S0urceUser', s0urceUserSchema);
 
@@ -192,6 +201,18 @@ client.on('messageCreate', async (message) => {
         }
         await sender.save();
 
+        if (message.author.id === '302050872383242240' && message.channel.id === bumpchannelId){
+            setTimeout(async () => {
+                try {
+                    const channel = await client.channels.fetch(bumpchannelId);
+                    if (channel) {
+                        await channel.send(`<@&1573733636438630532>, il est temps de bump !`);
+                    }
+                } catch (err) {
+                    console.error('Erreur envoi bump:', err);
+                }
+            }, 7200000);
+        }
         if (text === '/ping') {
             if (!isModo) {
                 return message.reply("❌ Tu n'as pas les permissions d'administrateur pour utiliser cette commande !");
@@ -317,23 +338,23 @@ client.on('messageCreate', async (message) => {
             await config.save();
             await message.channel.send("✅ Rôles de modération enregistrés avec succès !");
         }
-        if (text === '/s0urceHere') {
-            config.s0urceChannelId = message.channel.id;
-            s0urceChannel = message.channel;
+        if (text === '/BotHere') {
+            config.BotchannelId = message.channel.id;
+            Botchannel = message.channel;
             await config.save();
-            if (s0urceChannel) {
-                await message.channel.send('Success, the channel have been defined for s0urce');
+            if (Botchannel) {
+                await message.channel.send('Succès, la chaine pr le bot est ici');
             }
 
         }
-        if (text.startsWith('/s0urceName')) {
-            const pseudo = text.slice('/s0urceName'.length).trim().toLowerCase();
+        if (text.startsWith('/jeuID')) {
+            const pseudo = text.slice('/jeuNom'.length).trim().toLowerCase();
             await S0urceUser.findOneAndUpdate(
-                { s0urceName: pseudo },
-                { s0urceName: pseudo, discordId: message.author.id },
+                { jeuNom: pseudo },
+                { jeuNom: pseudo, discordId: message.author.id },
                 { upsert: true }
             );
-            await message.reply('✅ Pseudo associé !');
+            await message.reply('✅ IDs associés !');
         }
     } catch (err) {
         console.error('Erreur messageCreate:', err);
@@ -467,63 +488,10 @@ setInterval(() => {
     http.get(`http://localhost:${port}/ping`, (res) => {}).on('error', () => {});
     https.get('https://mechabeaverd-mm41.onrender.com', (res) => {}).on('error', () => {});
 }, 5 * 60 * 1000);
+app.post('/sendUser', async (req, res) => {
+    try {
+        const {ID, Attaque, Defense, habitants, bonheur, ville, gold, surface, multi} = req.body;
+    } catch (err) {
 
-
-app.post('/sendTime', async (req, res) => {
-    res.sendStatus(200);
-
-    const pseudo = (req.body.realUsername || '').toLowerCase();
-    const user = await S0urceUser.findOne({ s0urceName: pseudo });
-    if (!user) {
-        return;
     }
-    const delai = timeTowait;
-
-    setTimeout(async () => {
-        try { 
-            if (!s0urceChannel) {
-                const config = await GuildConfig.findOne({});
-                if (config && config.s0urceChannelId) {
-                    s0urceChannel = await client.channels.fetch(config.s0urceChannelId).catch(() => null);
-                }
-            }
-            if (s0urceChannel) {
-                await s0urceChannel.send(`<@${user.discordId}>, il est temps de looter les agents !`);
-            } else {
-                console.log('❌ Aucun salon s0urce n\'a été trouvé.');
-            }
-        }
-        catch (err) {
-            console.error('Erreur lors de l\'envoi du message s0urce:', err);
-        }
-    }, delai);
-});
-app.post('/sendTime2', async (req, res) => {
-    res.sendStatus(200);
-
-    const pseudo = (req.body.realUsername || '').toLowerCase();
-    const user = await S0urceUser.findOne({ s0urceName: pseudo });
-    if (!user) {
-        return;
-    }
-    const delai = 2 * 60;
-
-    setTimeout(async () => {
-        try { 
-            if (!s0urceChannel) {
-                const config = await GuildConfig.findOne({});
-                if (config && config.s0urceChannelId) {
-                    s0urceChannel = await client.channels.fetch(config.s0urceChannelId).catch(() => null);
-                }
-            }
-            if (s0urceChannel) {
-                await s0urceChannel.send(`<@${user.discordId}>, il est temps de looter les agents !`);
-            } else {
-                console.log('❌ Aucun salon s0urce n\'a été trouvé.');
-            }
-        }
-        catch (err) {
-            console.error('Erreur lors de l\'envoi du message s0urce:', err);
-        }
-    }, delai);
-});
+})
