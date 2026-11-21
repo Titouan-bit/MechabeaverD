@@ -23,8 +23,8 @@ const jokes = [
     "My wife told me to stop impersonating a flamingo. I had to put my foot down 🦩"
 ]
 
-let xpNeeded = 0;
-let xpPerMessage = 0;
+let xpNeeded = 500;
+let xpPerMessage = 10;
 
 let Botchannel = null;
 const bumpchannelId = '1573626473896742962';
@@ -196,7 +196,7 @@ client.on('messageCreate', async (message) => {
         if (sender.xp >= xpNeeded) {
             sender.Level += 1;
             message.member.roles.add(message.guild.roles.cache.find(r => r.name === `Level ${sender.Level}`));
-            await message.channel.send(`congrats: <@${message.author.id}> Est passé ${sender.Level}`);
+            await message.channel.send(`congrats: <@${message.author.id}> Est passé niveau ${sender.Level}`);
             sender.xp = 0;
         }
         await sender.save();
